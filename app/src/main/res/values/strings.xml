@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">Calculator</string>
+
+    <string name="slash">"/"</string>
+    <string name="asterisk">"*"</string>
+    <string name="minus">"-"</string>
+    <string name="plus">"+"</string>
+    <string name="clear">"C"</string>
+    <string name="equal">"="</string>
+</resources>
