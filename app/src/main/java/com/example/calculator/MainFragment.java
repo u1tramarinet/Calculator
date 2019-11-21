@@ -3,6 +3,7 @@ package com.example.calculator;
 import android.content.Context;
 import android.os.Bundle;
 
+import androidx.annotation.IdRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
@@ -78,8 +79,7 @@ public class MainFragment extends Fragment {
     private void initViews(View root) {
         textViewFormula = root.findViewById(R.id.text_formula);
 
-        button0 = root.findViewById(R.id.button_0);
-        button0.setOnClickListener(new OnNumberClickListener(0));
+        button0 = obtainNumberButton(root, R.id.button_0, 0);
         button1 = root.findViewById(R.id.button_1);
         button1.setOnClickListener(new OnNumberClickListener(1));
         button2 = root.findViewById(R.id.button_2);
@@ -100,13 +100,13 @@ public class MainFragment extends Fragment {
         button9.setOnClickListener(new OnNumberClickListener(9));
 
         buttonSlash = root.findViewById(R.id.button_slash);
-        buttonSlash.setOnClickListener(new OnOperatorClickListener("/"));
+        buttonSlash.setOnClickListener(new OnOperatorClickListener(Operator.SLASH));
         buttonAsterisk = root.findViewById(R.id.button_asterisk);
-        buttonAsterisk.setOnClickListener(new OnOperatorClickListener("*"));
+        buttonAsterisk.setOnClickListener(new OnOperatorClickListener(Operator.ASTERISK));
         buttonPlus = root.findViewById(R.id.button_plus);
-        buttonPlus.setOnClickListener(new OnOperatorClickListener("+"));
+        buttonPlus.setOnClickListener(new OnOperatorClickListener(Operator.PLUS));
         buttonMinus = root.findViewById(R.id.button_minus);
-        buttonMinus.setOnClickListener(new OnOperatorClickListener("-"));
+        buttonMinus.setOnClickListener(new OnOperatorClickListener(Operator.MINUS));
 
         buttonClear = root.findViewById(R.id.button_clear);
         buttonClear.setOnClickListener(new View.OnClickListener() {
@@ -124,12 +124,23 @@ public class MainFragment extends Fragment {
         });
     }
 
+    private Button obtainNumberButton(View root, @IdRes int id, int number) {
+        View view = root.findViewById(id);
+        view.setOnClickListener(new OnNumberClickListener(number));
+        return (Button) view;
+    }
+
+    private Button obtainNumberButton(View view, int number) {
+        view.setOnClickListener(new OnNumberClickListener(number));
+        return (Button) view;
+    }
+
     private void addNumber(int number) {
         viewModel.addNumber(number);
     }
 
-    private void addOperator(String operator) {
-        viewModel.addOperato(operator);
+    private void addOperator(@NonNull Operator operator) {
+        viewModel.addOperator(operator);
     }
 
     private class OnNumberClickListener implements View.OnClickListener {
@@ -145,8 +156,9 @@ public class MainFragment extends Fragment {
     }
 
     private class OnOperatorClickListener implements View.OnClickListener {
-        private final String operator;
-        OnOperatorClickListener(String operator) {
+        @NonNull
+        private final Operator operator;
+        OnOperatorClickListener(@NonNull Operator operator) {
             this.operator = operator;
         }
 
