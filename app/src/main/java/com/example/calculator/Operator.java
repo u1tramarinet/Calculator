@@ -11,7 +11,7 @@ public enum Operator {
     public final String sign;
     public final Priority priority;
 
-    Operator(@NonNull String sign, Priority priority) {
+    Operator(@NonNull String sign, @NonNull Priority priority) {
         this.sign = sign;
         this.priority = priority;
     }

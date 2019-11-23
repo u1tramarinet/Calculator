@@ -9,12 +9,24 @@ public class MainViewModel extends ViewModel {
 
     @NonNull
     private final Calculator calculator = Calculator.getInstance();
-
+    @NonNull
     private final MutableLiveData<String> formula = new MutableLiveData<>();
+    @NonNull
     private final MutableLiveData<Long> result = new MutableLiveData<>();
+    @NonNull
+    private Calculator.Callback callback = new Calculator.Callback() {
+        @Override
+        public void onFormulaUpdated(@NonNull String formula) {
+            updateFormula(formula);
+        }
+
+        @Override
+        public void onResultUpdated(long result) {
+            updateResult(result);
+        }
+    };
 
     public MainViewModel() {
-        formula.setValue("0");
         result.setValue(0L);
     }
 
@@ -27,58 +39,19 @@ public class MainViewModel extends ViewModel {
     }
 
     public void addNumber(long number) {
-        calculator.addNumber(number, new Calculator.Callback() {
-            @Override
-            public void onFormulaUpdated(@NonNull String formula) {
-                updateFormula(formula);
-            }
-
-            @Override
-            public void onResultUpdated(long result) {
-                updateResult(result);
-            }
-        });
+        calculator.addNumber(number, callback);
     }
 
     public void addOperator(@NonNull Operator operator) {
-        calculator.addOperator(operator, new Calculator.Callback() {
-            @Override
-            public void onFormulaUpdated(@NonNull String formula) {
-                updateFormula(formula);
-            }
-
-            @Override
-            public void onResultUpdated(long result) {
-            }
-        });
+        calculator.addOperator(operator, callback);
     }
 
     public void clear() {
-        calculator.clear(new Calculator.Callback() {
-            @Override
-            public void onFormulaUpdated(@NonNull String formula) {
-                updateFormula(formula);
-            }
-
-            @Override
-            public void onResultUpdated(long result) {
-                updateResult(result);
-            }
-        });
+        calculator.clear(callback);
     }
 
     public void calculate() {
-        calculator.calculate(new Calculator.Callback() {
-            @Override
-            public void onFormulaUpdated(@NonNull String formula) {
-                updateFormula(formula);
-            }
-
-            @Override
-            public void onResultUpdated(long result) {
-                updateResult(result);
-            }
-        });
+        calculator.calculate(callback);
     }
 
     private void updateFormula(@NonNull String formula) {

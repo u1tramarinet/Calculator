@@ -9,15 +9,18 @@ import java.util.List;
 public class Calculator {
     private static Calculator INSTANCE = new Calculator();
 
-    private enum FormulaState {
+    private enum State {
         EMPTY,
         NUMBER,
         OPERATOR
     }
 
-    private FormulaState state = FormulaState.EMPTY;
+    @NonNull
+    private State state = State.EMPTY;
 
+    @NonNull
     private List<Long> values = new ArrayList<>();
+    @NonNull
     private List<Operator> operators = new ArrayList<>();
 
     private Calculator() {
@@ -39,7 +42,7 @@ public class Calculator {
                 values.set(indexLast, value);
                 break;
         }
-        state = FormulaState.NUMBER;
+        state = State.NUMBER;
         updateFormula(callback);
         calculate(new ArrayList<>(values), new ArrayList<>(operators), callback);
     }
@@ -56,14 +59,14 @@ public class Calculator {
                 operators.add(operator);
                 break;
         }
-        state = FormulaState.OPERATOR;
+        state = State.OPERATOR;
         updateFormula(callback);
     }
 
     public void clear(@Nullable Callback callback) {
         values.clear();
         operators.clear();
-        state = FormulaState.EMPTY;
+        state = State.EMPTY;
         updateFormula(callback);
         calculate(new ArrayList<>(values), new ArrayList<>(operators), callback);
     }
