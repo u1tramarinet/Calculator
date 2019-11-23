@@ -7,4 +7,9 @@
     <string name="plus">"+"</string>
     <string name="clear">"C"</string>
     <string name="equal">"="</string>
+
+    <string name="format_result">= %d</string>
+
+    <string name="title_formula">Formula</string>
+    <string name="title_result">Result</string>
 </resources>

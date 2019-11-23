@@ -5,117 +5,87 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class MainViewModel extends ViewModel {
 
-    private enum State {
-        EMPTY,
-        NUMBER,
-        OPERATOR
-    }
+    @NonNull
+    private final Calculator calculator = Calculator.getInstance();
 
-    private State state = State.EMPTY;
     private final MutableLiveData<String> formula = new MutableLiveData<>();
+    private final MutableLiveData<Long> result = new MutableLiveData<>();
 
-    private List<Integer> values = new ArrayList<>();
-    private List<Operator> operators = new ArrayList<>();
+    public MainViewModel() {
+        formula.setValue("0");
+        result.setValue(0L);
+    }
 
     public LiveData<String> formula() {
         return formula;
     }
 
-    public void addNumber(int number) {
-        switch (state) {
-            case EMPTY:
-            case OPERATOR:
-                values.add(number);
-                break;
-            case NUMBER:
-                int targetIndex = values.size() - 1;
-                int nVal = values.get(targetIndex) * 10 + number;
-                values.set(targetIndex, nVal);
-                break;
-        }
-        state = State.NUMBER;
-        updateFormula();
+    public LiveData<Long> result() {
+        return result;
+    }
+
+    public void addNumber(long number) {
+        calculator.addNumber(number, new Calculator.Callback() {
+            @Override
+            public void onFormulaUpdated(@NonNull String formula) {
+                updateFormula(formula);
+            }
+
+            @Override
+            public void onResultUpdated(long result) {
+                updateResult(result);
+            }
+        });
     }
 
     public void addOperator(@NonNull Operator operator) {
-        switch (state) {
-            case EMPTY:
-                return;
-            case OPERATOR:
-                int oLen = operators.size();
-                operators.set(oLen - 1, operator);
-                break;
-            case NUMBER:
-                operators.add(operator);
-                break;
-        }
-        state = State.OPERATOR;
-        updateFormula();
+        calculator.addOperator(operator, new Calculator.Callback() {
+            @Override
+            public void onFormulaUpdated(@NonNull String formula) {
+                updateFormula(formula);
+            }
+
+            @Override
+            public void onResultUpdated(long result) {
+            }
+        });
     }
 
     public void clear() {
-        values.clear();
-        operators.clear();
-        state = State.EMPTY;
-        updateFormula();
+        calculator.clear(new Calculator.Callback() {
+            @Override
+            public void onFormulaUpdated(@NonNull String formula) {
+                updateFormula(formula);
+            }
+
+            @Override
+            public void onResultUpdated(long result) {
+                updateResult(result);
+            }
+        });
     }
 
     public void calculate() {
-        if ((state != State.NUMBER) || (values.size() == 1)) {
-            return;
-        }
-        int i = 0;
-
-        // handle "*" or "/"
-        while (i < operators.size()) {
-            Operator operator = operators.get(i);
-            switch (operator) {
-                case ASTERISK:
-                case SLASH:
-                    values.set(i, Operator.calculate(values.get(i), operator, values.get(i + 1)));
-                    values.remove(i + 1);
-                    operators.remove(i);
-                    break;
-                case PLUS:
-                case MINUS:
-                    i++;
-                    break;
+        calculator.calculate(new Calculator.Callback() {
+            @Override
+            public void onFormulaUpdated(@NonNull String formula) {
+                updateFormula(formula);
             }
-        }
 
-        // handle "+" or "-"
-        i = 0;
-        while (i < operators.size()) {
-            Operator operator = operators.get(i);
-            switch (operator) {
-                case PLUS:
-                case MINUS:
-                    values.set(i, Operator.calculate(values.get(i), operator, values.get(i + 1)));
-                    values.remove(i + 1);
-                    operators.remove(i);
-                    break;
-                case ASTERISK:
-                case SLASH:
-                    i++;
-                    break;
+            @Override
+            public void onResultUpdated(long result) {
+                updateResult(result);
             }
-        }
-        updateFormula();
+        });
     }
 
-    private void updateFormula() {
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0 ; i < values.size(); i++) {
-            sb.append(values.get(i).toString());
-            if (i < operators.size()) {
-                sb.append(operators.get(i).sign);
-            }
-        }
-        formula.postValue(sb.toString());
+    private void updateFormula(@NonNull String formula) {
+        this.formula.postValue(formula);
+    }
+
+    private void updateResult(long result) {
+        this.result.postValue(result);
     }
 }

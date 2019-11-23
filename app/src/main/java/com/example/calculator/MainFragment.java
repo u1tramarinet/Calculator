@@ -18,33 +18,10 @@ import android.widget.TextView;
 public class MainFragment extends Fragment {
 
     private MainViewModel viewModel;
-
     private TextView textViewFormula;
-
-    private Button button0;
-    private Button button1;
-    private Button button2;
-    private Button button3;
-    private Button button4;
-    private Button button5;
-    private Button button6;
-    private Button button7;
-    private Button button8;
-    private Button button9;
-
-    private Button buttonSlash;
-    private Button buttonAsterisk;
-    private Button buttonPlus;
-    private Button buttonMinus;
-
-    private Button buttonClear;
-    private Button buttonEqual;
+    private TextView textViewResult;
 
     public MainFragment() {
-    }
-
-    public static MainFragment newInstance() {
-        return new MainFragment();
     }
 
     @Override
@@ -58,8 +35,14 @@ public class MainFragment extends Fragment {
         viewModel = MainActivity.obtainViewModel(getActivity());
         viewModel.formula().observe(this, new Observer<String>() {
             @Override
-            public void onChanged(String s) {
-                textViewFormula.setText(s);
+            public void onChanged(String formula) {
+                textViewFormula.setText(formula);
+            }
+        });
+        viewModel.result().observe(this, new Observer<Long>() {
+            @Override
+            public void onChanged(Long result) {
+                textViewResult.setText(getString(R.string.format_result, result));
             }
         });
     }
@@ -76,46 +59,24 @@ public class MainFragment extends Fragment {
         initViews(view);
     }
 
-    private void initViews(View root) {
+    private void initViews(@NonNull View root) {
         textViewFormula = root.findViewById(R.id.text_formula);
+        textViewResult = root.findViewById(R.id.text_result);
 
-        button0 = obtainNumberButton(root, R.id.button_0, 0);
-        button1 = root.findViewById(R.id.button_1);
-        button1.setOnClickListener(new OnNumberClickListener(1));
-        button2 = root.findViewById(R.id.button_2);
-        button2.setOnClickListener(new OnNumberClickListener(2));
-        button3 = root.findViewById(R.id.button_3);
-        button3.setOnClickListener(new OnNumberClickListener(3));
-        button4 = root.findViewById(R.id.button_4);
-        button4.setOnClickListener(new OnNumberClickListener(4));
-        button5 = root.findViewById(R.id.button_5);
-        button5.setOnClickListener(new OnNumberClickListener(5));
-        button6 = root.findViewById(R.id.button_6);
-        button6.setOnClickListener(new OnNumberClickListener(6));
-        button7 = root.findViewById(R.id.button_7);
-        button7.setOnClickListener(new OnNumberClickListener(7));
-        button8 = root.findViewById(R.id.button_8);
-        button8.setOnClickListener(new OnNumberClickListener(8));
-        button9 = root.findViewById(R.id.button_9);
-        button9.setOnClickListener(new OnNumberClickListener(9));
+        initNumberButtons(root);
+        initOperatorButton(root, R.id.button_slash, Operator.SLASH);
+        initOperatorButton(root, R.id.button_asterisk, Operator.ASTERISK);
+        initOperatorButton(root, R.id.button_plus, Operator.PLUS);
+        initOperatorButton(root, R.id.button_minus, Operator.MINUS);
 
-        buttonSlash = root.findViewById(R.id.button_slash);
-        buttonSlash.setOnClickListener(new OnOperatorClickListener(Operator.SLASH));
-        buttonAsterisk = root.findViewById(R.id.button_asterisk);
-        buttonAsterisk.setOnClickListener(new OnOperatorClickListener(Operator.ASTERISK));
-        buttonPlus = root.findViewById(R.id.button_plus);
-        buttonPlus.setOnClickListener(new OnOperatorClickListener(Operator.PLUS));
-        buttonMinus = root.findViewById(R.id.button_minus);
-        buttonMinus.setOnClickListener(new OnOperatorClickListener(Operator.MINUS));
-
-        buttonClear = root.findViewById(R.id.button_clear);
+        Button buttonClear = root.findViewById(R.id.button_clear);
         buttonClear.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 viewModel.clear();
             }
         });
-        buttonEqual = root.findViewById(R.id.button_equal);
+        Button buttonEqual = root.findViewById(R.id.button_equal);
         buttonEqual.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -124,18 +85,28 @@ public class MainFragment extends Fragment {
         });
     }
 
-    private Button obtainNumberButton(View root, @IdRes int id, int number) {
-        View view = root.findViewById(id);
-        view.setOnClickListener(new OnNumberClickListener(number));
-        return (Button) view;
+    private void initNumberButtons(@NonNull View root) {
+        @IdRes int[] buttonNumberIds = {
+                R.id.button_0, R.id.button_1, R.id.button_2, R.id.button_3, R.id.button_4,
+                R.id.button_5, R.id.button_6, R.id.button_7, R.id.button_8, R.id.button_9
+        };
+
+        for (int i = 0; i < buttonNumberIds.length; i++) {
+            initNumberButton(root, buttonNumberIds[i], i);
+        }
     }
 
-    private Button obtainNumberButton(View view, int number) {
-        view.setOnClickListener(new OnNumberClickListener(number));
-        return (Button) view;
+    private void initNumberButton(@NonNull View root, @IdRes int buttonId, int number) {
+        root.findViewById(buttonId)
+                .setOnClickListener(new OnNumberClickListener(number));
     }
 
-    private void addNumber(int number) {
+    private void initOperatorButton(@NonNull View root, @IdRes int buttonId, @NonNull Operator operator) {
+        root.findViewById(buttonId)
+                .setOnClickListener(new OnOperatorClickListener(operator));
+    }
+
+    private void addNumber(long number) {
         viewModel.addNumber(number);
     }
 
@@ -144,7 +115,8 @@ public class MainFragment extends Fragment {
     }
 
     private class OnNumberClickListener implements View.OnClickListener {
-        private final int number;
+        private final long number;
+
         OnNumberClickListener(int number) {
             this.number = number;
         }
@@ -158,6 +130,7 @@ public class MainFragment extends Fragment {
     private class OnOperatorClickListener implements View.OnClickListener {
         @NonNull
         private final Operator operator;
+
         OnOperatorClickListener(@NonNull Operator operator) {
             this.operator = operator;
         }
