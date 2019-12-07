@@ -72,6 +72,14 @@ public class Calculator {
     }
 
     public void calculate(@Nullable Callback callback) {
+        switch (state) {
+            case EMPTY:
+            case OPERATOR:
+                return;
+            case NUMBER:
+                break;
+        }
+
         Priority[] priorities = Priority.values();
 
         for (Priority priority : priorities) {
